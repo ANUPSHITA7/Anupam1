@@ -9,6 +9,7 @@ import {
   Revenue,
 } from './definitions';
 import { formatCurrency } from './utils';
+import axios from 'axios';
 
 export async function fetchRevenue() {
   // Add noStore() here to prevent the response from being cached.
@@ -315,4 +316,54 @@ export async function getUser(email: string) {
     console.error('Failed to fetch user:', error);
     throw new Error('Failed to fetch user.');
   }
+}
+
+
+export async function fetchUser() {
+  try{
+    const data= await sql`SELECT COUNT(*) from users`;
+    const numberOfUsers = Number(data.rows[0].count ?? '0');
+    return numberOfUsers;
+  }catch(error){
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch user data.');
+  }
+
+}
+
+export async function fetchTotalRevenue() {
+  try {
+    const data = await sql`SELECT SUM(revenue) from revenue`;
+    const totalRevenue = formatCurrency(data.rows[0].sum ?? '0');
+    return totalRevenue;
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch revenue data.');
+  }
+}
+
+export async function fetchApiCustomer() {
+  try {
+    const {data} = await axios.get(" https://jsonplaceholder.typicode.com/todos/");
+    // console.log(data);
+    return data;
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch Api data.');
+  }
+}
+
+
+export async function currentRevenue() {
+  try{
+    let date = new Date();
+    let allmonth = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
+    let month = allmonth[date.getMonth()]
+    const data = await sql`SELECT revenue FROM revenue WHERE month = ${month}`;
+    const currentRevenue = formatCurrency(data.rows[0].revenue ?? '0');
+    return currentRevenue;
+  } catch(error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch revenue data.');
+  }
 }
